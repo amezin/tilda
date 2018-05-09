@@ -541,6 +541,19 @@ static gboolean mouse_leave (GtkWidget *widget, G_GNUC_UNUSED GdkEvent *event, g
     return GDK_EVENT_STOP;
 }
 
+static gboolean mouse_button_press (GtkWidget *widget, GdkEvent *event, gpointer data)
+{
+    GdkEventButton *ev = (GdkEventButton*)event;
+    tilda_window *tw = TILDA_WINDOW(data);
+
+    if (ev->type == GDK_2BUTTON_PRESS) {
+        tilda_window_add_tab(tw);
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
 static gboolean focus_out_event_cb (GtkWidget *widget, G_GNUC_UNUSED GdkEvent *event, gpointer data)
 {
     DEBUG_FUNCTION ("focus_out_event_cb");
@@ -1045,6 +1058,8 @@ gboolean tilda_window_init (const gchar *config_file, const gint instance, tilda
     g_signal_connect (G_OBJECT(tw->window), "focus-out-event", G_CALLBACK (focus_out_event_cb), tw);
     g_signal_connect (G_OBJECT(tw->window), "enter-notify-event", G_CALLBACK (mouse_enter), tw);
     g_signal_connect (G_OBJECT(tw->window), "leave-notify-event", G_CALLBACK (mouse_leave), tw);
+
+    g_signal_connect (G_OBJECT(tw->notebook), "button-press-event", G_CALLBACK (mouse_button_press), tw);
 
     /* We need this signal to detect changes in the order of tabs so that we can keep the order
      * of tilda_terms in the tw->terms structure in sync with the order of tabs. */
